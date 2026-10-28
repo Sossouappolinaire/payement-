@@ -237,7 +237,7 @@ final class SebPayApi {
             return env;
         } catch (ApiException e) {
             throw e;
-        } catch (IOException | JSONException e) {
+        } catch (IOException e) {
             throw new ApiException(0, "Connexion impossible : " + e.getMessage());
         } finally {
             if (c != null) c.disconnect();
