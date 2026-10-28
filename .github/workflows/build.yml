@@ -20,8 +20,6 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      # Les fichiers sont à plat à la racine du dépôt : on reconstruit
-      # la structure Android standard ici, le temps du build.
       - name: Organiser le projet
         run: |
           set -e
@@ -32,7 +30,16 @@ jobs:
           cp app.gradle app/build.gradle
 
       - name: Compiler l'APK
-        run: gradle assembleDebug --no-daemon --console=plain
+        run: |
+          set +e
+          gradle assembleDebug --no-daemon --console=plain > build.log 2>&1
+          CODE=$?
+          if [ $CODE -ne 0 ]; then
+            ERR=$(grep -E -A3 "error:" build.log | head -30 | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=Erreur de compilation::$ERR"
+            tail -40 build.log
+          fi
+          exit $CODE
 
       - uses: actions/upload-artifact@v4
         with:
